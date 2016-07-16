@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
 
 /**
  * Created by matias on 6/22/16.
@@ -11,51 +12,118 @@ import java.io.RandomAccessFile;
 public class MovieFile {
     private File f;
     private RandomAccessFile raf;
-    private long size = 0;
+    private int registrySize = 79;
+    private BinarySearchTree<Movie> indexFile;
 
     public MovieFile(String filename) throws FileNotFoundException {
         f = new File(filename);
         raf = new RandomAccessFile(f,"rw");
     }
 
-    public void addMovieRegister(Movie movie) throws IOException{
-        raf.writeUTF(movie.getTitle());
+    public void start() throws IOException {
+        raf.seek(0);
+    }
+
+    public void end() throws IOException {
+        raf.seek(raf.length());
+    }
+
+    public void goTo(long reg) throws IOException{
+        raf.seek((reg-1)*registrySize);
+    }
+
+    public void close() throws IOException{
+        raf.close();
+    }
+
+    public long getLength() throws IOException {
+        return raf.length();
+    }
+
+    public boolean isEnd() throws IOException {
+        return raf.getFilePointer()==raf.length();
+    }
+
+    public void write(Movie movie) throws IOException{
+        raf.writeUTF(Utilities.adapt(movie.getTitle(), 50));
         raf.writeInt(movie.getYear());
-        raf.writeUTF(movie.getGenre());
-        raf.writeBoolean(movie.isChildFriendly());
-        raf.writeBoolean(true); //Movie is now available
-        size += 5; //Adds 4 for the Integer and 1 for the Boolean.
-        int titleSize = movie.getTitle().toCharArray().length +2;
-        int genreSize = movie.getGenre().toCharArray().length +2;
-        size += titleSize + genreSize;
-    }
-
-    public Movie readMovieRegister() throws IOException{
-        return new Movie(raf.readUTF(),raf.readInt(),raf.readUTF(),raf.readBoolean());
-    }
-
-    public void deleteRegister(String name) throws IOException{
-        //Logic elimination of movie that matches parameter
-    }
-
-    public String readString(String str) throws  IOException{
-        return raf.readUTF();
+        raf.writeUTF(Utilities.adapt(movie.getGenre(), 20));
+        raf.writeBoolean(movie.isAvailable());
     }
 
     public long getFileLength() throws IOException{
-        return raf.length(); //Retorna la cantidad de bytes del archivo
+        return raf.length();
     }
 
-    public int readInt() throws IOException{
-        return raf.readInt(); //O lo que sea que haya
+    public Movie read() throws IOException {
+        return new Movie(raf.readUTF(), raf.readInt(), raf.readUTF(), raf.readBoolean());
     }
 
-    public long amountOfRegisters() throws IOException {
-        return raf.length(); // y lo divido por el tamano del registro
+    public Movie readAt(int index) throws IOException {
+        raf.seek(index*registrySize);
+        return new Movie(raf.readUTF(), raf.readInt(), raf.readUTF(), raf.readBoolean());
     }
 
-    public void addRegister() throws IOException {
-        raf.seek(0); // pone al puntero al inicoi del archivo
-        raf.seek(raf.length()); //pone al punter al final del archivo;
+    public long amountOfRegisters() throws IOException{
+        return raf.length()/registrySize;
+    }
+
+    public void listAll() throws IOException {
+        Movie movie;
+        for (long i = 0; i < amountOfRegisters() ; i++) {
+            movie = readAt((int)i);
+            if (movie.isAvailable()) System.out.println(movie.toString());
+        }
+    }
+
+
+
+    public void listAllYear(int year) throws IOException {
+        Movie movie;
+        for (long i = 0; i < amountOfRegisters(); i++) {
+            movie = readAt((int)i);
+            if (movie.isAvailable() && movie.getYear() == year) System.out.println(movie.toString());
+        }
+    }
+
+    public Movie search (String name) throws IOException {
+        long size = amountOfRegisters();
+        name = Utilities.adapt(name, 50);
+        start();
+        Movie movie;
+        for (int i = 0; i < size; i++) {
+            movie = read();
+            if (movie.isAvailable() && movie.getTitle().equals(name)) {
+                System.out.println("Movie found!");
+                return movie;
+            }
+        }
+        return new Movie();
+    }
+
+    public boolean delete(String name) throws IOException {
+        Movie m = search(name);
+        if (m.isAvailable()) {
+            raf.seek(raf.getFilePointer() - registrySize);
+            m.setAvailable(false);
+            write(m);
+            return true;
+        }
+        else return false;
+    }
+
+    public boolean modify(Movie m) throws IOException{ //Similar al delete. Move to main
+        Movie toModify = search(m.getTitle());
+        if (toModify.isAvailable()) {
+            raf.seek(raf.getFilePointer() - registrySize);
+            write(m);
+            return true;
+        }
+        else return false;
+    }
+
+    public void generateIndexFile() {
+        indexFile = new BinarySearchTree<>();
+
     }
 }
