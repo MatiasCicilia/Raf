@@ -6,7 +6,7 @@ import java.util.Scanner;
  */
 public class Main {
     static Scanner scanner = new Scanner(System.in);
-    public static void main(String[] args) throws IOException{
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
         MovieFile file = new MovieFile("MovieFile");
         int choice = 0;
         while (choice != 8) {
@@ -23,7 +23,8 @@ public class Main {
                     file.modify(modifyMovie());
                     break;
                 case 4:
-                    file.search(searchByTitle());
+                    System.out.println("You searched for: ");
+                    System.out.println(file.search(searchByTitle()));
                     break;
                 case 5:
                     file.listAll();
@@ -32,7 +33,13 @@ public class Main {
                     file.listAllYear(filterByYear());
                     break;
                 case 7:
-
+                    file.generateIndexFile("index");
+                    break;
+                case 8:
+                    file.loadIndexFile("index");
+                    break;
+                case 9:
+                    file.saveIndexFile("index");
                     break;
                 default:
                     System.out.println("Please enter a valid number");
@@ -49,7 +56,8 @@ public class Main {
         System.out.println("Press 5 to get element list");
         System.out.println("Press 6 to filter by year");
         System.out.println("Press 7 to generate index file");
-        System.out.println("Press 8 to exit");
+        System.out.println("Press 8 to load old index file");
+        System.out.println("Press 9 to save index file");
     }
 
     private static Movie addMovie() {
@@ -76,8 +84,8 @@ public class Main {
 
     private static String searchByTitle() {
         System.out.println("Enter movie title: ");
+        scanner.nextLine();
         return scanner.nextLine();
-
     }
 
     private static int filterByYear() {
@@ -99,7 +107,4 @@ public class Main {
         return new Movie(name, year, genre, true);
     }
 
-    private static void generateIndex() {
-
-    }
 }

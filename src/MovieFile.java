@@ -1,9 +1,6 @@
 import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.util.ArrayList;
 
 /**
@@ -13,7 +10,7 @@ public class MovieFile {
     private File f;
     private RandomAccessFile raf;
     private int registrySize = 79;
-    private BinarySearchTree<Movie> indexFile;
+    private BinarySearchTree<MovieIndex> indexFile;
 
     public MovieFile(String filename) throws FileNotFoundException {
         f = new File(filename);
@@ -86,10 +83,17 @@ public class MovieFile {
     }
 
     public Movie search (String name) throws IOException {
-        long size = amountOfRegisters();
         name = Utilities.adapt(name, 50);
-        start();
-        Movie movie;
+        if(indexFile.contains(new MovieIndex(new Movie(name,0,"",true),0))){
+            raf.seek(indexFile.search(new MovieIndex(new Movie(name,0,"",true),0)).getPosition());
+            return read();
+        }
+        return new Movie();
+
+        /**
+         * long size = amountOfRegisters();
+         * start();
+         * Movie movie;
         for (int i = 0; i < size; i++) {
             movie = read();
             if (movie.isAvailable() && movie.getTitle().equals(name)) {
@@ -97,7 +101,7 @@ public class MovieFile {
                 return movie;
             }
         }
-        return new Movie();
+        return new Movie();*/
     }
 
     public boolean delete(String name) throws IOException {
@@ -121,8 +125,33 @@ public class MovieFile {
         else return false;
     }
 
-    public void generateIndexFile() {
+    public void generateIndexFile(String filename) throws IOException {
         indexFile = new BinarySearchTree<>();
+        long size = amountOfRegisters();
+        start();
 
+        for (int i = 0; i < size; i++) {
+            Movie movie = read();
+            if (movie.isAvailable()) {
+                indexFile.insert(new MovieIndex(movie,raf.getFilePointer()-registrySize));
+            }
+        }
+        saveIndexFile(filename);
+    }
+
+    public void loadIndexFile(String filename) throws IOException, ClassNotFoundException {
+        ObjectInputStream objectInputStream= new ObjectInputStream(new FileInputStream(filename));
+        indexFile = (BinarySearchTree<MovieIndex>) objectInputStream.readObject();
+        objectInputStream.close();
+    }
+
+    public void saveIndexFile(String filename) throws IOException{
+        ObjectOutputStream objectOutputStream= new ObjectOutputStream(new FileOutputStream(filename));
+        objectOutputStream.writeObject(indexFile);
+        objectOutputStream.close();
+    }
+
+    public boolean hasIndexFile(){
+        return indexFile!=null;
     }
 }

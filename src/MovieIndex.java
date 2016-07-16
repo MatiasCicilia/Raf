@@ -1,7 +1,9 @@
+import java.io.Serializable;
+
 /**
  * Created by Ignacio on 7/16/16.
  */
-public class MovieIndex implements Comparable<MovieIndex> {
+public class MovieIndex implements Comparable<MovieIndex> ,Serializable {
     private Movie movie;
     private long position;
 
@@ -13,6 +15,10 @@ public class MovieIndex implements Comparable<MovieIndex> {
 
     public Movie getMovie() {
         return movie;
+    }
+
+    public long getPosition() {
+        return position;
     }
 
     @Override

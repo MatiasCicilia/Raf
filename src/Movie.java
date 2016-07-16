@@ -1,7 +1,9 @@
+import java.io.Serializable;
+
 /**
  * Created by matias on 6/22/16.
  */
-public class Movie implements Comparable<Movie> {
+public class Movie implements Comparable<Movie>, Serializable {
     private String title; // 50 Bytes + 2
     private int year; // 4 Bytes
     private String genre; // 20 Bytes + 2
