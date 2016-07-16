@@ -17,7 +17,7 @@ public class Movie implements Comparable<Movie> {
         this.title = Utilities.adapt(title, 50);
         this.year = year;
         this.genre = Utilities.adapt(genre, 20);
-        this.isAvailable = true;
+        this.isAvailable = isAvailable;
     }
 
     public String getTitle() {

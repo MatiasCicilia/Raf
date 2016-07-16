@@ -77,7 +77,6 @@ public class MovieFile {
     }
 
 
-
     public void listAllYear(int year) throws IOException {
         Movie movie;
         for (long i = 0; i < amountOfRegisters(); i++) {
@@ -109,7 +108,7 @@ public class MovieFile {
             write(m);
             return true;
         }
-        else return false;
+        return false;
     }
 
     public boolean modify(Movie m) throws IOException{ //Similar al delete. Move to main
