@@ -9,7 +9,7 @@ public class Main {
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         MovieFile file = new MovieFile("MovieFile");
         int choice = 0;
-        while (choice != 8) {
+        while (choice != 10) {
             showMenu();
             choice = scanner.nextInt();
             switch (choice){

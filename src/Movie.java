@@ -55,7 +55,7 @@ public class Movie implements Comparable<Movie>, Serializable {
     }
 
     public String toString() {
-        return "Movie name: " + title + "\nYear released: " + year + "\nGenre: " + genre + "\n is available: " + isAvailable;
+        return "Movie name: " + title + "\nYear released: " + year + "\nGenre: " + genre + "\nAvailable: " + (isAvailable ? "Yes" : "No") + "\n--------------";
     }
 
     @Override

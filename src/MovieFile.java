@@ -83,25 +83,28 @@ public class MovieFile {
     }
 
     public Movie search (String name) throws IOException {
-        name = Utilities.adapt(name, 50);
-        if(indexFile.contains(new MovieIndex(new Movie(name,0,"",true),0))){
-            raf.seek(indexFile.search(new MovieIndex(new Movie(name,0,"",true),0)).getPosition());
-            return read();
-        }
-        return new Movie();
-
-        /**
-         * long size = amountOfRegisters();
-         * start();
-         * Movie movie;
-        for (int i = 0; i < size; i++) {
-            movie = read();
-            if (movie.isAvailable() && movie.getTitle().equals(name)) {
-                System.out.println("Movie found!");
-                return movie;
+        if (hasIndexFile()) {
+            name = Utilities.adapt(name, 50);
+            if (indexFile.contains(new MovieIndex(new Movie(name, 0, "", true), 0))) {
+                raf.seek(indexFile.search(new MovieIndex(new Movie(name, 0, "", true), 0)).getPosition());
+                return read();
             }
         }
-        return new Movie();*/
+        else {
+            System.out.println("Index file not found. Starting sequential search... ");
+            long size = amountOfRegisters();
+            start();
+            Movie movie;
+            name = Utilities.adapt(name, 50);
+            for (int i = 0; i < size; i++) {
+                movie = read();
+                if (movie.isAvailable() && movie.getTitle().equals(name)) {
+                    System.out.println("Movie found!");
+                    return movie;
+                }
+            }
+        }
+        return new Movie();
     }
 
     public boolean delete(String name) throws IOException {
@@ -115,7 +118,7 @@ public class MovieFile {
         return false;
     }
 
-    public boolean modify(Movie m) throws IOException{ //Similar al delete. Move to main
+    public boolean modify(Movie m) throws IOException{
         Movie toModify = search(m.getTitle());
         if (toModify.isAvailable()) {
             raf.seek(raf.getFilePointer() - registrySize);
