@@ -46,6 +46,9 @@ public class MovieFile {
         raf.writeInt(movie.getYear());
         raf.writeUTF(Utilities.adapt(movie.getGenre(), 20));
         raf.writeBoolean(movie.isAvailable());
+        if (hasIndexFile()) {
+            indexFile.insert(new MovieIndex(movie, raf.getFilePointer()-registrySize));
+        }
     }
 
     public long getFileLength() throws IOException{
